@@ -1,0 +1,26 @@
+{
+    "name": "taskly-root",
+    "private": true,
+    "workspaces": [
+        "backend",
+        "frontend"
+    ],
+    "scripts": {
+        "dev": "concurrently --kill-others \"npm:backend-dev\" \"npm:frontend-dev\"",
+        "backend-dev": "npm run dev --workspace backend",
+        "frontend-dev": "npm run dev --workspace frontend"
+    },
+    "devDependencies": {
+        "concurrently": "^8.0.0"
+    },
+    "version": "1.0.0",
+    "description": "Taskly allows you to collaborate and track tasks with an intuitive and easy-to-use interface designed with HCI principles in mind that will streamline your workflow and take the mental strain away from your mind, so you can focus on being the best version of yourself!",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://gitlab.sci.uwo.ca/vkrstevs/Taskly.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+    
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #8b4513;
+        background-image: url("https://www.transparenttextures.com/patterns/corkboard.png");
+        background-size: cover;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+    
+      .register-box {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        width: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    
+      .register-box h2 {
+        margin-bottom: 24px;
+        font-weight: 600;
+        color: #333;
+      }
+    
+      .register-box input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 16px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        outline: none;
+        transition: border 0.3s ease;
+      }
+    
+      .register-box input:focus {
+        border-color: #4a90e2;
+      }
+    
+      .register-box button {
+        width: 100%;
+        padding: 12px;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+    
+      .register-box button:hover {
+        background-color: #357abd;
+      }
+    
+      .login-link {
+        margin-top: 16px;
+        font-size: 14px;
+      }
+    
+      .login-link a {
+        color: #4a90e2;
+        text-decoration: none;
+        font-weight: 500;
+      }
+    
+      .login-link a:hover {
+        text-decoration: underline;
+      }
+
+      /* Hint styles */
+      .hint {
+        width: 100%;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-bottom: 0;
+        color: #e74c3c;
+        cursor: pointer;
+        font-size: 14px;
+        opacity: 0;
+      }
+
+      .hint.show {
+        padding: 8px;
+        max-height: 60px;
+        margin-bottom: 16px;
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="register-container">
+      <div class="register-box">
+        <h2>Register</h2>
+        <form id="register-form" autocomplete="off">
+          <input type="text" name="username" placeholder="Username" autocomplete="new-username" required />
+          <input type="email" name="email" placeholder="Email" autocomplete="off" required />
+          <input type="password" name="password" placeholder="Password" autocomplete="new-password" required />
+          <input type="password" name="password_confirm" placeholder="Confirm Password" autocomplete="new-password-confirm" required />
+          <div id="hint" class="hint"></div>
+          <button type="submit">Sign Up</button>
+        </form>
+        <div class="login-link">
+          Already have an account? <a href="login.html">Login here</a>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { register } from './apis.js';
+      
+      // Add the openHint function
+      window.openHint = function(speed, text, color = '#e74c3c') {
+        const hintElement = document.getElementById("hint");
+        const isVisible = hintElement.classList.contains('show');
+        
+        // Update hint text and color
+        hintElement.textContent = text;
+        hintElement.style.color = color;
+        
+        // If hint is already visible, just update the content
+        if (!isVisible) {
+          // Set transition speed based on parameter
+          hintElement.style.transition = `all ${speed/1000}s ease`;
+          // Show the hint with animation
+          hintElement.classList.add('show');
+        }
+      };
+      
+      // Add click listener to dismiss hint
+      document.getElementById("hint").addEventListener("click", function() {
+        this.classList.remove('show');
+      });
+      
+      // Add validation functions
+      function validateUsername(username) {
+        if (!username) return "Username is required";
+        if (username.length < 2) return "Username must be at least 2 characters";
+        if (username.length > 20) return "Username cannot exceed 20 characters";
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) return "Username can only contain letters, numbers and underscores";
+        return null;
+      }
+      
+      function validateEmail(email) {
+        if (!email) return "Email is required";
+        if (!/\S+@\S+\.\S+/.test(email)) return "Please enter a valid email address";
+        return null;
+      }
+      
+      function validatePassword(password) {
+        if (!password) return "Password is required";
+        if (password.length < 6) return "Password must be at least 6 characters";
+        if (password.length > 32) return "Password cannot exceed 32 characters";
+        return null;
+      }
+      
+      document.getElementById("register-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const username = e.target.username.value;
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+        const password_confirm = e.target.password_confirm.value;
+
+        // Validate fields before submission
+        const usernameError = validateUsername(username);
+        if (usernameError) {
+          openHint(300, usernameError);
+          return;
+        }
+        
+        const emailError = validateEmail(email);
+        if (emailError) {
+          openHint(300, emailError);
+          return;
+        }
+        
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+          openHint(300, passwordError);
+          return;
+        }
+
+        if (password !== password_confirm) {
+          openHint(300, "Passwords do not match.");
+          return;
+        }
+
+        // All validations passed, attempt registration
+        try {
+          const result = await register(username, password);
+          
+          if (result.success) {
+            openHint(300, "Account created successfully! Redirecting...", "#27ae60");
+            // Wait a moment to show success message before redirecting
+            setTimeout(() => {
+              localStorage.setItem("token", result.token); // Store token if needed
+              window.location.href = "dashboard.html";
+            }, 500);
+          } else {
+            openHint(300, result.error || "Registration failed. Please try again.");
+          }
+        } catch (error) {
+          openHint(300, "Server error. Please try again later.");
+        }
+      });
+      
+      // Real-time validation as user types
+      document.querySelector('input[name="username"]').addEventListener('blur', function() {
+        const error = validateUsername(this.value);
+        if (error) openHint(300, error);
+      });
+      
+      document.querySelector('input[name="email"]').addEventListener('blur', function() {
+        const error = validateEmail(this.value);
+        if (error) openHint(300, error);
+      });
+      
+      document.querySelector('input[name="password"]').addEventListener('blur', function() {
+        const error = validatePassword(this.value);
+        if (error) openHint(300, error);
+      });
+      
+      // Clear hint when starting to type in any field
+      document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('focus', function() {
+          document.getElementById("hint").classList.remove('show');
+        });
+      });
+    </script>
+  </body>
+</html>

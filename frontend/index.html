@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Taskly</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #c68c53a8;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background-color: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.25);
+      width: 350px;
+    }
+    h1 {
+      font-family: 'Kalam', cursive;
+      color: #333;
+      margin-top: 0;
+    }
+    p {
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .loader {
+      border: 10px solid #f3f3f3;
+      border-top: 10px solid #c68c53;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Taskly</h1>
+    <p>Redirecting you to the right place...</p>
+    <div class="loader"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if token exists in localStorage
+      const token = localStorage.getItem("token");
+      
+      // Small delay for loader animation to be visible
+      setTimeout(function() {
+        if (token) {
+          // Token exists, redirect to dashboard
+          window.location.href = "dashboard.html";
+        } else {
+          // No token, redirect to registration
+          window.location.href = "registration.html";
+        }
+      }, 1000); // 1 second delay for the animation to be visible
+    });
+  </script>
+</body>
+</html>

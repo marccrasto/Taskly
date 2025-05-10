@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanban Board</title>
+    <!-- Using Poppins for a modern sans-serif look -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
+    <style>
+      /* Global resets */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #8b4513;
+        background-image: url("https://www.transparenttextures.com/patterns/corkboard.png");
+        background-size: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .board {
+        width: 90%;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        min-height: 75vh;
+      }
+
+      /* Board title */
+      .board-title {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #333;
+      }
+
+      /* The top bar: "New TODO" button + notification */
+      #top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .left-group {
+        display: flex;
+        align-items: center;
+      }
+
+      /* The "New TODO" button */
+      #new-todo-btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background: #4a90e2;
+        color: #fff;
+        transition: background 0.3s ease;
+      }
+
+      #new-todo-btn:hover {
+        background: #357abd;
+      }
+
+      /* Notification styles */
+      .noti-wrapper {
+        position: relative;
+      }
+      #noti-btn {
+        background: #ff6f61;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: #fff;
+        transition: background 0.3s ease;
+      }
+      #noti-btn:hover {
+        background: #ff4c3b;
+      }
+
+      .noti-dropdown {
+        position: absolute;
+        right: 0;
+        top: 40px;
+        background: #fff;
+        width: 300px;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        padding: 10px;
+        z-index: 10;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .notif-card {
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .notif-card:last-child {
+        border-bottom: none;
+      }
+
+      .notif-time {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+      }
+
+      /* Lanes arranged side by side */
+      .lanes {
+        display: flex;
+        gap: 20px;
+      }
+
+      /* Each lane styled as a note pinned to a board */
+      .swim-lane {
+        flex: 1;
+        min-width: 250px;
+        background: #fefaf0;
+        padding: 20px;
+        border-radius: 5px;
+        min-height: 450px;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      .swim-lane::before {
+        content: "";
+        width: 25px;
+        height: 25px;
+        background: #e74c3c;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+   
+
+      /* Sticky note styles */
+      .task {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        font-size: 16px;
+        margin-top: 15px;
+        box-shadow: 0px 5px 15px 0px rgba(0,0,0,0.3);
+        cursor: move;
+        border-radius: 2px;
+        word-wrap: break-word;
+        min-height: 100px;
+      }
+
+      .task .task-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .task .task-due-date {
+        font-size: 12px;
+        margin-top: 5px;
+      }
+
+      /* Modal / Popup for creating a new task */
+      .modal-overlay {
+        display: none; /* hidden by default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .modal-overlay.active {
+        display: flex; /* show overlay when active */
+      }
+      .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        max-width: 90%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-content h2 {
+        margin-bottom: 15px;
+      }
+      .modal-content textarea {
+        width: 100%;
+        height: 100px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 2px solid #ddd;
+        outline: none;
+        resize: vertical;
+      }
+
+      .modal-content input,
+      .modal-content select {
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        outline: none;
+      }
+
+      .modal-content input:focus,
+      .modal-content select:focus {
+        border-color: #4a90e2;
+      }
+
+      .modal-content label {
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+
+      .modal-content textarea:focus {
+        border-color: #4a90e2;
+      }
+      .modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+      .modal-buttons button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .modal-buttons .add-btn {
+        background-color: #4a90e2;
+        color: #fff;
+      }
+      .modal-buttons .add-btn:hover {
+        background-color: #357abd;
+      }
+      .modal-buttons .cancel-btn {
+        background-color: #bbb;
+        color: #fff;
+      }
+      .modal-buttons .cancel-btn:hover {
+        background-color: #999;
+      }
+      #edit-title-btn:hover {
+        transform: scale(1.2);
+      }
+      .heading {
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: 600;
+        color: #4a90e2;
+      }
+    </style>
+    <script src="drag.js" defer></script>
+  </head>
+  <body>
+    <div class="board">
+      <!-- Board title will be dynamically inserted here -->
+      <div style="display: flex; align-items: bottom; justify-content: center; margin-bottom: 20px;">
+        <h1 class="board-title" id="board-title">Loading board...</h1>
+        <button id="edit-title-btn" style="background: none; border: none; font-size: 20px; margin-left: 10px; margin-bottom: 20px; cursor: pointer; transition: transform 0.3s ease;">✏️</button>
+      </div>
+      
+      <!-- Top bar with "New to-do" button and notification -->
+      <div id="top-bar">
+        <div class="left-group">
+          <!-- Single button to open the new to-do modal -->
+          <button type="button" id="new-todo-btn">New TODO</button>
+        </div>
+        <div class="noti-wrapper">
+          <button type="button" id="noti-btn" class="noti-bell-btn"> <i class="fas fa-bell"></i><button>
+          <div id="noti-dropdown" class="noti-dropdown hidden">
+            
+          </div>
+        </div>
+      </div>
+      
+      <div id="progress-wrapper" style="margin-bottom: 20px;">
+        <label for="progress-bar" style="font-weight: 500;">Progress:</label>
+        <div style="background: #ddd; border-radius: 5px; overflow: hidden;">
+          <div id="progress-bar" style="height: 20px; width: 0%; background: #4a90e2; transition: width 0.5s;"></div>
+        </div>
+        <div id="progress-percent" style="margin-top: 5px; font-size: 14px;">0% complete</div>
+      </div>
+
+      <!-- Modal Overlay for New TO-DO -->
+      <div class="modal-overlay" id="todo-modal">
+        <div class="modal-content">
+          <h2>Create a New TODO</h2>
+          
+          <label for="task-title">Title:</label>
+          <input type="text" id="task-title" placeholder="Task title" required />
+          
+          <label for="todo-textarea">Description:</label>
+          <textarea id="todo-textarea" placeholder="Description (optional)"></textarea>
+      
+          <label for="priority">Priority:</label>
+          <select id="priority">
+            <option value="1">Low</option>
+            <option value="3">Medium</option>
+            <option value="5">High</option>
+          </select>
+
+          <label for="column-select">Column:</label>
+          <select id="column-select">
+            <!-- Column options will be dynamically inserted here -->
+          </select>
+      
+          <label for="due-date">Due Date:</label>
+          <input type="date" id="due-date" />
+      
+          <div class="modal-buttons">
+            <button type="button" class="add-btn" id="add-todo-btn">Add Task</button>
+            <button type="button" class="cancel-btn" id="cancel-todo-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lanes container, columns will be added here dynamically -->
+      <div class="lanes" id="lanes-container">
+        <!-- Columns will be generated dynamically here -->
+      </div>
+    </div>
+
+    <script type="module">
+      import { getBoardById, updateBoardTitle } from "./apis.js";
+
+      // Get the current URL
+      const urlParams = new URLSearchParams(window.location.search);
+
+      // Extract the 'id' parameter
+      const id = parseInt(urlParams.get('id'));
+
+      // Board data storage
+      let boardData = null;
+      
+      // Functions to create visual elements
+      function createColumn(column) {
+        const columnDiv = document.createElement('div');
+        columnDiv.classList.add('swim-lane');
+        columnDiv.dataset.columnId = column.id;
+        
+        const heading = document.createElement('h3');
+        heading.classList.add('heading');
+        heading.textContent = `${column.name} (0)`;
+        
+        columnDiv.appendChild(heading);
+        
+        // Add the stickies to the column
+        if (column.stickies && column.stickies.length > 0) {
+          column.stickies.forEach(sticky => {
+            const stickyElement = createSticky(sticky);
+            columnDiv.appendChild(stickyElement);
+          });
+        }
+        
+        return columnDiv;
+      }
+      
+      function createSticky(sticky) {
+        const task = document.createElement('div');
+        task.classList.add('task');
+        task.dataset.stickyId = sticky.id;
+        
+        // Set the background color based on priority level
+        const priorityColors = {
+          1: '#04e022', // Low - green
+          2: '#a0db8e', 
+          3: '#ffcc00', // Medium - yellow
+          4: '#ffaa33',
+          5: '#ff6f61'  // High - red
+        };
+        
+        task.style.backgroundColor = priorityColors[sticky.priority_level] || '#04e022';
+        
+        // Apply random styling for a more natural look
+        task.style.margin = margin();
+        task.style.transform = rotate();
+        
+        // Make it draggable
+        task.setAttribute('draggable', 'true');
+        
+        // Add drag events
+        task.addEventListener('dragstart', () => {
+          task.classList.add('is-dragging');
+        });
+        
+        task.addEventListener('dragend', () => {
+          task.classList.remove('is-dragging');
+        });
+        
+        // Add content
+        const titleElement = document.createElement('div');
+        titleElement.classList.add('task-title');
+        titleElement.textContent = sticky.text;
+        task.appendChild(titleElement);
+        
+        if (sticky.description) {
+          const descElement = document.createElement('div');
+          descElement.classList.add('task-description');
+          descElement.textContent = sticky.description;
+          task.appendChild(descElement);
+        }
+        
+        // Add priority level label
+        const priorityLabels = {
+          1: 'Low',
+          2: 'Low-Medium',
+          3: 'Medium',
+          4: 'Medium-High',
+          5: 'High'
+        };
+        
+        const priorityElement = document.createElement('div');
+        priorityElement.classList.add('task-priority');
+        priorityElement.textContent = `Priority: ${priorityLabels[sticky.priority_level] || 'Low'}`;
+        task.appendChild(priorityElement);
+        
+        // Add due date if present
+        if (sticky.due_date) {
+          const dueDate = new Date(sticky.due_date);
+          const dueDateElement = document.createElement('div');
+          dueDateElement.classList.add('task-due-date');
+          const today = new Date();
+          const timeDiff = dueDate - today;
+          const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+          dueDateElement.textContent = `Due: ${dueDate.toLocaleDateString()} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} left)`;
+          task.appendChild(dueDateElement);
+        }
+        
+        // Controls container
+        const controls = document.createElement('div');
+        controls.style.marginTop = '10px';
+        controls.style.display = 'flex';
+        controls.style.justifyContent = 'center';
+        controls.style.gap = '10px';
+
+        // Edit button
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '✏️';
+        editBtn.style.border = 'none';
+        editBtn.style.fontSize = '25px';
+        editBtn.style.background = 'transparent';
+        editBtn.style.cursor = 'pointer';
+        editBtn.title = 'Edit task';
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.fontSize = '25px';
+        deleteBtn.style.background = 'transparent';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.title = 'Delete task';
+
+        controls.appendChild(editBtn);
+        controls.appendChild(deleteBtn);
+        task.appendChild(controls);
+
+        // Edit functionality
+        editBtn.addEventListener('click', () => {
+          document.getElementById('task-title').value = sticky.text;
+          document.getElementById('todo-textarea').value = sticky.description || '';
+          document.getElementById('priority').value = sticky.priority_level;
+          document.getElementById('due-date').value = sticky.due_date ? sticky.due_date.split("T")[0] : '';
+          document.getElementById('column-select').value = sticky.column_id;
+
+          // Remove the old sticky
+          task.remove();
+
+          // Show modal to re-add updated sticky
+          todoModal.classList.add('active');
+        });
+
+        // Delete functionality
+        deleteBtn.addEventListener('click', () => {
+          if (confirm("Are you sure you want to delete this task?")) {
+            task.remove();
+            updateProgressAndCounts();
+          }
+        });
+
+        return task;
+      }
+      
+      // Utility functions for styling
+      function margin() {
+        const random_margin = ["-5px", "1px", "5px", "10px", "15px", "20px"];
+        return random_margin[Math.floor(Math.random() * random_margin.length)];
+      }
+      
+      function rotate() {
+        const random_rotate = [
+          "rotate(3deg)",
+          "rotate(1deg)",
+          "rotate(-3deg)",
+          "rotate(-1deg)",
+          "rotate(5deg)",
+          "rotate(10deg)",
+        ];
+        return random_rotate[Math.floor(Math.random() * random_rotate.length)];
+      }
+
+      function updateProgressAndCounts() {
+        const lanes = document.querySelectorAll('.swim-lane');
+        let total = 0;
+        let done = 0;
+
+        lanes.forEach(lane => {
+          const tasks = lane.querySelectorAll('.task');
+          const columnName = lane.querySelector('.heading');
+          const count = tasks.length;
+
+          const originalName = columnName.textContent.split('(')[0].trim();
+          columnName.textContent = `${originalName} (${count})`;
+
+          if (originalName.toLowerCase() === 'done') {
+            done += count;
+          } else if (['todo', 'in progress'].includes(originalName.toLowerCase())) {
+            total += count;
+          }
+        });
+
+        const all = done + total;
+        const percent = all === 0 ? 0 : Math.round((done / all) * 100);
+
+        const bar = document.getElementById('progress-bar');
+        const label = document.getElementById('progress-percent');
+
+        bar.style.width = `${percent}%`;
+        label.textContent = `${percent}% complete`;
+
+        // Celebratory message when fully done
+        if (all > 0 && done === all) {
+          label.textContent += " 🎉 All tasks complete!";
+        }
+      }
+
+      function loadDefaultBoard() {
+        const lanesContainer = document.getElementById('lanes-container');
+        lanesContainer.innerHTML = ''; // Clear any existing content
+
+        // Define the default columns
+        const defaultColumns = [
+            { id: 1, name: 'TODO' },
+            { id: 2, name: 'IN PROGRESS' },
+            { id: 3, name: 'DONE' }
+        ];
+
+        // Create and append each column
+        defaultColumns.forEach(column => {
+            const columnElement = createColumn(column);
+            lanesContainer.appendChild(columnElement);
+        });
+
+        // Update column options in the modal
+        const columnSelect = document.getElementById('column-select');
+        columnSelect.innerHTML = '';
+        defaultColumns.forEach(column => {
+            const option = document.createElement('option');
+            option.value = column.id;
+            option.textContent = column.name;
+            columnSelect.appendChild(option);
+        });
+
+        // Initialize drag and drop functionality
+        initDragAndDrop();
+        updateProgressAndCounts();
+      }
+      
+      // Initialize the board
+      async function initializeBoard() {
+
+        if (!id) {
+          document.getElementById('board-title').textContent = 'New Unnamed Board*';
+
+          // TODO load default board
+          loadDefaultBoard();
+
+          return;
+        }
+
+        
+        try {
+          // Fetch board data
+          const response = await getBoardById(id);
+          
+          if (!response.success) {
+            document.getElementById('board-title').textContent = 'Failed to load board';
+            console.error(response.error);
+            return;
+          }
+
+          
+          // Store the board data
+          boardData = response.board;
+          console.log("Board data loaded:", boardData);
+          
+          // Set the board title
+          document.getElementById('board-title').textContent = boardData.name;
+          
+          // Clear any existing columns
+          const lanesContainer = document.getElementById('lanes-container');
+          lanesContainer.innerHTML = '';
+          
+          // Create columns
+          if (boardData.columns && boardData.columns.length > 0) {
+            // Sort columns by position
+            boardData.columns.sort((a, b) => a.position - b.position);
+            
+            // Create and append columns
+            boardData.columns.forEach(column => {
+              const columnElement = createColumn(column);
+              lanesContainer.appendChild(columnElement);
+            });
+            
+            // Update column options in modal
+            const columnSelect = document.getElementById('column-select');
+            columnSelect.innerHTML = '';
+            
+            boardData.columns.forEach(column => {
+              const option = document.createElement('option');
+              option.value = column.id;
+              option.textContent = column.name;
+              columnSelect.appendChild(option);
+            });
+          } else {
+            lanesContainer.innerHTML = '<p>No columns found in this board</p>';
+          }
+          
+          updateProgressAndCounts();
+
+          // Initialize drag and drop functionality
+          initDragAndDrop();
+
+
+          // Edit board title functionality
+          const editTitleBtn = document.getElementById('edit-title-btn');
+          const boardTitle = document.getElementById('board-title');
+
+          editTitleBtn.addEventListener('click', async () => {
+            const currentTitle = boardTitle.textContent;
+            const newTitle = prompt('Enter new board title:', currentTitle);
+            
+            if (newTitle !== null && newTitle.trim() !== '') {
+              const trimmedTitle = newTitle.trim();
+              boardTitle.textContent = trimmedTitle;
+              
+              if (boardData && boardData.id) {
+                  try {
+                      const updatedBoard = await updateBoardTitle(boardData.id, trimmedTitle);
+                      console.log('Board title updated in database:', updatedBoard);
+                      // Update local boardData
+                      boardData.name = updatedBoard.name;
+                      boardData.updated_at = updatedBoard.updated_at;
+                  } catch (error) {
+                      console.error('Error updating board title:', error);
+                      // Optionally revert the UI change if the API call fails
+                      boardTitle.textContent = currentTitle;
+                      alert('Failed to update board title. Please try again.');
+                  }
+              }
+            }
+          });
+        } catch (error) {
+          console.error("Error initializing board:", error);
+          document.getElementById('board-title').textContent = 'Error loading board';
+        }
+      } 
+      
+      // Drag and drop functionality
+      function initDragAndDrop() {
+        const draggables = document.querySelectorAll('.task');
+        const droppables = document.querySelectorAll('.swim-lane');
+        
+        draggables.forEach(task => {
+          task.addEventListener('dragstart', () => {
+            task.classList.add('is-dragging');
+          });
+          
+          task.addEventListener('dragend', () => {
+            task.classList.remove('is-dragging');
+            updateProgressAndCounts();
+          });
+        });
+        
+        droppables.forEach(zone => {
+          zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            
+            const bottomTask = insertAboveTask(zone, e.clientY);
+            const curTask = document.querySelector('.is-dragging');
+            
+            if (!bottomTask) {
+              zone.appendChild(curTask);
+            } else {
+              zone.insertBefore(curTask, bottomTask);
+            }
+          });
+        });
+      }
+      
+      function insertAboveTask(zone, mouseY) {
+        const els = zone.querySelectorAll('.task:not(.is-dragging)');
+        
+        let closestTask = null;
+        let closestOffset = Number.NEGATIVE_INFINITY;
+        
+        els.forEach(task => {
+          const { top } = task.getBoundingClientRect();
+          const offset = mouseY - top;
+          
+          if (offset < 0 && offset > closestOffset) {
+            closestOffset = offset;
+            closestTask = task;
+          }
+        });
+        
+        return closestTask;
+      }
+      
+      // Modal handling
+      const newTodoBtn = document.getElementById('new-todo-btn');
+      const todoModal = document.getElementById('todo-modal');
+      const addTodoBtn = document.getElementById('add-todo-btn');
+      const cancelTodoBtn = document.getElementById('cancel-todo-btn');
+      
+      // Open modal
+      newTodoBtn.addEventListener('click', () => {
+        todoModal.classList.add('active');
+        
+        // Reset form fields
+        document.getElementById('task-title').value = '';
+        document.getElementById('todo-textarea').value = '';
+        document.getElementById('priority').value = '1';
+        document.getElementById('due-date').value = '';
+      });
+      
+      // Close modal
+      cancelTodoBtn.addEventListener('click', () => {
+        todoModal.classList.remove('active');
+      });
+      
+      // Add new task
+      addTodoBtn.addEventListener('click', async () => {
+        const title = document.getElementById('task-title').value.trim();
+        const description = document.getElementById('todo-textarea').value.trim();
+        const priority = parseInt(document.getElementById('priority').value);
+        const dueDate = document.getElementById('due-date').value;
+        const columnId = document.getElementById('column-select').value;
+        
+        if (!title) {
+          alert('Please enter a task title');
+          return;
+        }
+        
+        // Here you would normally make an API call to add the task to the database
+        // For now, we'll just add it to the UI
+        const newSticky = {
+          id: Date.now(), // Temporary ID
+          column_id: parseInt(columnId),
+          text: title,
+          description: description,
+          priority_level: priority,
+          due_date: dueDate ? new Date(dueDate).toISOString() : null,
+          created_at: new Date().toISOString()
+        };
+        
+        // Find the column
+        const column = document.querySelector(`.swim-lane[data-column-id="${columnId}"]`);
+        if (column) {
+          const stickyElement = createSticky(newSticky);
+          column.appendChild(stickyElement);
+          createAndStoreNotification(0, newSticky.text, 6);
+          // Make the new sticky draggable
+          initDragAndDrop();
+          updateProgressAndCounts();
+        }
+        
+        todoModal.classList.remove('active');
+      });
+      
+      // Notification dropdown
+      const notiBtn = document.getElementById('noti-btn');
+      const notiDropdown = document.getElementById('noti-dropdown');
+      
+      notiBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        notiDropdown.classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', (event) => {
+        if (
+          !notiDropdown.classList.contains('hidden') &&
+          event.target !== notiBtn &&
+          !notiDropdown.contains(event.target)
+        ) {
+          notiDropdown.classList.add('hidden');
+        }
+      });
+      
+      // Initialize the board when the page loads
+      initializeBoard();
+    </script>
+    <script src="notifications.js" defer></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        // Replace 6 with a real boardID for testing
+        initNotifications(6);
+    
+        // Manually create a test notification
+        createAndStoreNotification(0, "Test Task", 6);
+      });
+    </script>
+  </body>
+</html>

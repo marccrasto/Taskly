@@ -1,22 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Meta settings for character encoding and responsiveness -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
+
+    <!-- External stylesheet and fonts -->
     <link rel="stylesheet" href="styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
+      /* Importing Poppins font */
       @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-    
+
+      /* Reset and box model setup */
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
-    
+
+      /* Full page layout and background */
       body {
         font-family: 'Poppins', sans-serif;
         background-color: #8b4513;
@@ -28,7 +35,8 @@
         align-items: center;
         padding: 20px;
       }
-    
+
+      /* Main login form container */
       .login-box {
         background: rgba(255, 255, 255, 0.9);
         padding: 40px;
@@ -39,13 +47,15 @@
         flex-direction: column;
         align-items: center;
       }
-    
+
+      /* Login heading */
       .login-box h2 {
         margin-bottom: 24px;
         font-weight: 600;
         color: #333;
       }
-    
+
+      /* Input styling */
       .login-box input {
         width: 100%;
         padding: 12px;
@@ -56,11 +66,13 @@
         outline: none;
         transition: border 0.3s ease;
       }
-    
+
+      /* Highlight input on focus */
       .login-box input:focus {
         border-color: #4a90e2;
       }
-    
+
+      /* Login button styling */
       .login-box button {
         width: 100%;
         padding: 12px;
@@ -73,27 +85,30 @@
         cursor: pointer;
         transition: background 0.3s ease;
       }
-    
+
+      /* Hover effect for login button */
       .login-box button:hover {
         background-color: #357abd;
       }
-    
+
+      /* Sign-up link container */
       .signup-link {
         margin-top: 16px;
         font-size: 14px;
       }
-    
+
+      /* Style for the sign-up hyperlink */
       .signup-link a {
         color: #4a90e2;
         text-decoration: none;
         font-weight: 500;
       }
-    
+
       .signup-link a:hover {
         text-decoration: underline;
       }
 
-      /* Hint styles */
+      /* Hint (error/success messages) styles */
       .hint {
         width: 100%;
         padding: 0;
@@ -108,6 +123,7 @@
         opacity: 0;
       }
 
+      /* Shown state for hint */
       .hint.show {
         padding: 8px;
         max-height: 60px;
@@ -116,16 +132,24 @@
       }
     </style>
   </head>
+
   <body>
     <div class="login-container">
       <div class="login-box">
         <h2>Login</h2>
         <form id="login-form">
+          <!-- Input fields -->
           <input type="text" name="username" placeholder="Username" required />
           <input type="password" name="password" placeholder="Password" required />
+          
+          <!-- Hint area for validation messages -->
           <div id="hint" class="hint"></div>
+          
+          <!-- Submit button -->
           <button type="submit">Login</button>
         </form>
+
+        <!-- Sign up navigation -->
         <div class="signup-link">
           Not a member? <a href="registration.html">Sign up here</a>
         </div>
@@ -134,57 +158,59 @@
 
     <script type="module">
       import { login } from './apis.js';
-      
-      // Add the openHint function
+
+      // Function to show hint messages (error/success)
       window.openHint = function(speed, text, color = '#e74c3c') {
         const hintElement = document.getElementById("hint");
         const isVisible = hintElement.classList.contains('show');
-        
-        // Update hint text and color
+
+        // Set hint text and color
         hintElement.textContent = text;
         hintElement.style.color = color;
-        
-        // If hint is already visible, just update the content
+
+        // Show hint only if not already visible
         if (!isVisible) {
-          // Set transition speed based on parameter
           hintElement.style.transition = `all ${speed/1000}s ease`;
-          // Show the hint with animation
           hintElement.classList.add('show');
         }
       };
-      
-      // Add click listener to dismiss hint
+
+      // Click-to-hide for hint
       document.getElementById("hint").addEventListener("click", function() {
         this.classList.remove('show');
       });
-      
-      // Add validation functions
+
+      // Username validation logic
       function validateUsername(username) {
         if (!username) return "Username is required";
         if (username.length < 2) return "Username must be at least 2 characters";
         if (username.length > 20) return "Username cannot exceed 20 characters";
         return null;
       }
-      
+
+      // Password validation logic
       function validatePassword(password) {
         if (!password) return "Password is required";
         if (password.length < 6) return "Password must be at least 6 characters";
         if (password.length > 32) return "Password cannot exceed 32 characters";
         return null;
       }
-      
+
+      // Form submission logic
       document.getElementById("login-form").addEventListener("submit", async function (e) {
         e.preventDefault();
+
+        // Grab input values
         const username = e.target.username.value;
         const password = e.target.password.value;
-        
-        // Validate fields before submission
+
+        // Client-side validation
         const usernameError = validateUsername(username);
         if (usernameError) {
           openHint(300, usernameError);
           return;
         }
-        
+
         const passwordError = validatePassword(password);
         if (passwordError) {
           openHint(300, passwordError);
@@ -192,32 +218,34 @@
         }
 
         try {
+          // Call login API
           const result = await login(username, password);
-          
+
           if (result.success) {
-            // Show success hint with green color
+            // Show success message
             openHint(300, "Login successful! Redirecting...", "#27ae60");
-            
-            // Wait a moment before redirecting
+
+            // Store token and redirect after a short delay
             setTimeout(() => {
               localStorage.setItem("token", result.token);
               window.location.href = "dashboard.html";
             }, 500);
           } else {
-            // Show error hint
+            // Show error from server response
             openHint(300, result.error || "Login failed. Please check your credentials.");
           }
         } catch (error) {
+          // Fallback error message
           openHint(300, "Server error. Please try again later.");
         }
       });
-      
-      // Real-time validation as user tabs away from fields
+
+      // Real-time validation on blur (when user leaves input)
       document.querySelector('input[name="username"]').addEventListener('blur', function() {
         const error = validateUsername(this.value);
         if (error) openHint(300, error);
       });
-      
+
       document.querySelector('input[name="password"]').addEventListener('blur', function() {
         const error = validatePassword(this.value);
         if (error) openHint(300, error);

@@ -1,146 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Metadata for character encoding and responsive design -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kanban Dashboard</title>
+
+  <!-- Google Fonts for custom styling -->
   <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="dashboard.css" />
+
   <style>
+    /* Additional font import */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    /* Reset and base styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #8b4513;
-  background-image: url("https://www.transparenttextures.com/patterns/corkboard.png");
-  background-size: cover;
-  height: 100vh;
-  overflow-x: hidden;
-  padding: 20px;
-  color: #333;
-}
+    /* Page background and font settings */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #8b4513;
+      background-image: url("https://www.transparenttextures.com/patterns/corkboard.png");
+      background-size: cover;
+      height: 100vh;
+      overflow-x: hidden;
+      padding: 20px;
+      color: #333;
+    }
 
-.dashboard {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
+    /* Container for dashboard content */
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
 
-h1 {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #4a90e2;
-  text-align: center;
-}
+    /* Main dashboard heading */
+    h1 {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #4a90e2;
+      text-align: center;
+    }
 
-.board-scroll {
-  display: flex;
-  gap: 24px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-}
+    /* Scrollable horizontal board container */
+    .board-scroll {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
 
-.board-card {
-  min-width: 280px;
-  background: #fefaf0;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
+    /* Individual board card */
+    .board-card {
+      min-width: 280px;
+      background: #fefaf0;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
 
-.board-card:hover {
-  transform: scale(1.03);
-}
+    /* Hover effect for board card */
+    .board-card:hover {
+      transform: scale(1.03);
+    }
 
-.board-card h2 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #4a90e2;
-  margin-bottom: 10px;
-}
+    /* Title inside a board card */
+    .board-card h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #4a90e2;
+      margin-bottom: 10px;
+    }
 
-.mini-lanes {
-  display: flex;
-  gap: 8px;
-}
+    /* Preview lanes inside a board card */
+    .mini-lanes {
+      display: flex;
+      gap: 8px;
+    }
 
-.mini-lane {
-  background: #c68c53a8;
-  padding: 8px;
-  border-radius: 8px;
-  flex: 1;
-  min-height: 100px;
-  overflow-y: auto;
-}
+    /* Preview of an individual lane */
+    .mini-lane {
+      background: #c68c53a8;
+      padding: 8px;
+      border-radius: 8px;
+      flex: 1;
+      min-height: 100px;
+      overflow-y: auto;
+    }
 
-.mini-task {
-  background: white;
-  font-size: 13px;
-  padding: 6px 8px;
-  border-radius: 4px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 6px;
-}
+    /* Preview of a task within mini-lane */
+    .mini-task {
+      background: white;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 6px;
+    }
 
-/* Style for the "+ New Board" tile */
-.add-new {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: #4a90e2;
-  background: transparent;
-  border: 2px dashed #4a90e2;
-}
+    /* Style for the "+ New Board" tile */
+    .add-new {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #4a90e2;
+      background: transparent;
+      border: 2px dashed #4a90e2;
+    }
 
-.plus-icon {
-  font-size: 48px;
-  font-weight: bold;
-}
+    /* Plus icon inside "New Board" */
+    .plus-icon {
+      font-size: 48px;
+      font-weight: bold;
+    }
 
+    /* Title bar with optional icons */
+    .title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.title-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    /* Trash icon for delete actions */
+    .trash-icon {
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.5s ease;
+    }
 
-.trash-icon {
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: transform 0.5s ease;
-}
+    /* Hover animation for trash icon */
+    .trash-icon:hover {
+      scale: 1.2;
+    }
 
-.trash-icon:hover {
-  scale: 1.2;
-}
-
-.fade-out {
-  opacity: 0;
-  transform: scale(0.95);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
+    /* Fade-out animation for removal */
+    .fade-out {
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
 
   </style>
 </head>
 <body>
+  <!-- Main dashboard container -->
   <div class="dashboard">
     <h1>Your Boards</h1>
+
+    <!-- Scrollable list of boards -->
     <div class="board-scroll" id="board-scroll">
-      <!-- Boards will be dynamically injected here -->
+      <!-- "+ New Board" card -->
       <div class="board-card add-new" id="add-new">
         <div class="plus-icon">+</div>
         <p>Create New Board</p>
@@ -148,6 +171,7 @@ h1 {
     </div>
   </div>
 
+  <!-- JS for dynamic dashboard behavior -->
   <script src="dashboard.js" type="module"></script>
 </body>
 </html>

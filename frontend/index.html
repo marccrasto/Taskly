@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Meta settings for character encoding and responsiveness -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to Taskly</title>
+
   <style>
+    /* Basic reset and centering of the entire body */
     body {
       font-family: Arial, sans-serif;
       display: flex;
@@ -12,8 +15,10 @@
       align-items: center;
       height: 100vh;
       margin: 0;
-      background-color: #c68c53a8;
+      background-color: #c68c53a8; /* soft brown background */
     }
+
+    /* Centered container box for message and loader */
     .container {
       display: flex;
       flex-direction: column;
@@ -26,15 +31,21 @@
       box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.25);
       width: 350px;
     }
+
+    /* Main welcome heading with handwritten font */
     h1 {
       font-family: 'Kalam', cursive;
       color: #333;
       margin-top: 0;
     }
+
+    /* Paragraph text styling */
     p {
       margin-bottom: 20px;
       color: #666;
     }
+
+    /* Circular loading spinner */
     .loader {
       border: 10px solid #f3f3f3;
       border-top: 10px solid #c68c53;
@@ -44,16 +55,22 @@
       animation: spin 1s linear infinite;
       margin: 10px auto;
     }
+
+    /* Spin animation for loader */
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
   </style>
+
+  <!-- Preload fonts from Google -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
+  <!-- Main container holding welcome message and loader -->
   <div class="container">
     <h1>Welcome to Taskly</h1>
     <p>Redirecting you to the right place...</p>
@@ -61,20 +78,21 @@
   </div>
 
   <script>
+    // Run when the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', function() {
-      // Check if token exists in localStorage
+      // Retrieve auth token from local storage
       const token = localStorage.getItem("token");
       
-      // Small delay for loader animation to be visible
+      // Wait 1 second before redirecting (for loader animation)
       setTimeout(function() {
         if (token) {
-          // Token exists, redirect to dashboard
+          // If token exists, redirect to dashboard
           window.location.href = "dashboard.html";
         } else {
-          // No token, redirect to registration
+          // If no token, redirect to registration page
           window.location.href = "registration.html";
         }
-      }, 1000); // 1 second delay for the animation to be visible
+      }, 1000); // Delay in milliseconds
     });
   </script>
 </body>
